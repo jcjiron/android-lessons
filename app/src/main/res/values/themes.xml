@@ -1,0 +1,4 @@
+<resources>
+    <!-- Tema base de la ventana; el resto del estilo lo pone Compose (Material 3). -->
+    <style name="Theme.QrApp" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
