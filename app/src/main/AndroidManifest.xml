@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
-
-    <uses-permission android:name="android.permission.CAMERA" />
-
     <application
         android:name=".QrApplication"
         android:allowBackup="true"
@@ -15,11 +9,6 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.QrApp">
-
-        <!-- Descarga el modelo de ML Kit al instalar la app en lugar de al primer uso -->
-        <meta-data
-            android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="barcode" />
 
         <activity
             android:name=".presentation.main.MainActivity"

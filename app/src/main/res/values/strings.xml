@@ -1,21 +1,12 @@
 <resources>
-    <string name="app_name">QR App</string>
+    <string name="app_name">Mi QR</string>
 
-    <string name="tab_scan">Escanear</string>
-    <string name="tab_generate">Generar</string>
+    <string name="empty_message">Todavía no tienes tu QR. Carga la foto que te mandaron.</string>
+    <string name="load_photo">Cargar foto</string>
+    <string name="load_photo_error">No se pudo cargar la foto. Intenta con otra.</string>
 
-    <string name="camera_permission_rationale">Necesitamos acceso a la cámara para leer códigos QR.</string>
-    <string name="camera_permission_grant">Dar permiso</string>
-    <string name="scan_hint">Apunta la cámara a un código QR</string>
-    <string name="scan_result_title">Resultado</string>
-    <string name="scan_again">Escanear otro</string>
-    <string name="action_copy">Copiar</string>
-    <string name="action_open">Abrir</string>
-    <string name="copied">Copiado al portapapeles</string>
+    <string name="more_options">Más opciones</string>
+    <string name="delete_image">Borrar imagen</string>
 
-    <string name="generate_label">Texto o URL</string>
-    <string name="generate_placeholder">https://ejemplo.com</string>
-    <string name="generate_empty">Escribe algo para generar tu QR</string>
-    <string name="generate_too_long">El texto es demasiado largo para un QR</string>
-    <string name="qr_content_description">Código QR generado</string>
+    <string name="qr_image_description">Mi código QR</string>
 </resources>
