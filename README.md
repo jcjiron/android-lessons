@@ -1,46 +1,95 @@
 # android-lessons — QR App
 
-App de Android para **leer** y **generar** códigos QR, hecha con Kotlin y Jetpack Compose.
+Android app to **scan** and **generate** QR codes, built with Kotlin and Jetpack Compose.
 
-## Funciones
+## Features
 
-- **Escanear**: usa la cámara (CameraX) y ML Kit para leer QR. Puedes copiar el resultado o abrirlo si es un link.
-- **Generar**: escribe un texto o URL y se genera el QR al momento (ZXing).
+- **Scan**: reads QR codes with the camera (CameraX + ML Kit). Copy the result, or open it if it is a link.
+- **Generate**: type text or a URL and the QR code is drawn as you type (ZXing).
 
 ## Stack
 
-| Qué | Librería |
+| What | Library |
 | --- | --- |
 | UI | Jetpack Compose + Material 3 |
-| Cámara | CameraX (`camera-camera2`, `camera-lifecycle`, `camera-view`) |
-| Lectura de QR | ML Kit Barcode Scanning |
-| Generación de QR | ZXing core |
+| Architecture | MVVM with Jetpack ViewModels + `StateFlow` |
+| Dependency injection | Hilt (KSP) |
+| Camera | CameraX |
+| QR reading | ML Kit Barcode Scanning |
+| QR generation | ZXing core |
 
 `minSdk` 26 · `targetSdk` 35 · JDK 17
 
-## Estructura
+## Project structure
 
 ```
 app/src/main/java/com/jcjiron/qrapp/
-├── MainActivity.kt          # Scaffold con barra inferior (Escanear / Generar)
-├── qr/
-│   ├── QrAnalyzer.kt        # Frames de CameraX → ML Kit
-│   ├── QrEncoder.kt         # Texto → BitMatrix (ZXing)
-│   └── BitMatrixExt.kt      # BitMatrix → Bitmap
-└── ui/
-    ├── scan/ScanScreen.kt   # Permiso de cámara, preview y resultado
-    ├── generate/GenerateScreen.kt
-    └── theme/Theme.kt
+├── QrApplication.kt              # @HiltAndroidApp
+├── data/
+│   ├── qr/ZxingQrEncoder.kt      # On-device data source: text → QR modules
+│   └── repository/QrRepositoryImpl.kt
+├── domain/                       # Pure Kotlin, no Android imports
+│   ├── model/                    # QrCode, ScannedCode, GenerateQrResult
+│   └── repository/QrRepository.kt
+├── presentation/
+│   ├── theme/                    # Color.kt, Type.kt, Shape.kt, Theme.kt
+│   ├── main/                     # MainActivity, MainViewModel, MainScreen (bottom tabs)
+│   ├── scan/                     # ScanScreen, ScanViewModel, QrCodeAnalyzer (CameraX → ML Kit)
+│   └── generate/                 # GenerateScreen, GenerateViewModel, QrCodeImage
+└── di/                           # Hilt modules: RepositoryModule, ScannerModule
 ```
 
-## Cómo correrla
+## Android rules
 
-1. Abre el proyecto en Android Studio.
-2. Corre la configuración `app` en un teléfono o emulador (el emulador puede usar la webcam como cámara trasera).
+How this project is built. One rule, one line.
 
-Desde la terminal:
+### Architecture
+
+- Clean Architecture in a single module, packaged by layer: `data`, `domain`, `presentation`, `di`.
+- Dependencies point inward: `presentation` → `domain` ← `data`; `domain` knows nothing about Android.
+- MVVM with Jetpack ViewModels; no MVP and no hand-updated listeners.
+- The ViewModel exposes state as `StateFlow` and the UI only observes it.
+
+### Data
+
+- A `Repository` orchestrates the data sources; the ViewModel never knows where the data comes from.
+- Remote and local data sources are always separate classes.
+- When the app needs them: Retrofit is the default HTTP client (`data/remote`, `RemoteDataSource`) and Room is the default local database (`data/local`, `LocalDataSource`).
+
+### Dependency injection
+
+- Hilt from the first commit; no dependency is instantiated by hand.
+- Hilt modules live in the `di` package, one per responsibility (e.g. repositories, scanner, network, database).
+
+### UI and theme
+
+- Jetpack Compose for all UI; no XML layouts.
+- `LightColors` and `DarkColors` live in separate variables so the theme can be switched in one line.
+- The theme defines colors, typography, shapes and surfaces; no composable hardcodes styles.
+
+### Build
+
+- Gradle with Kotlin DSL (`.kts`) and dependencies in the version catalog (`gradle/libs.versions.toml`).
+- Two build types: `debug` with `applicationIdSuffix = ".debug"` and `release` with no suffix.
+- When the app talks to a server, each build type injects its server URL via `buildConfigField` (with `buildConfig = true`).
+- Product flavors are declared from the start, even if commented out, because sooner or later they are needed.
+
+### Not used yet in this app
+
+The QR app works fully offline and stores nothing, so it has no `data/remote`, `data/local`, Retrofit, Room or server URL `buildConfigField` yet. They get added, following the rules above, once a feature needs them (e.g. a scan history → Room).
+
+## Running it
+
+1. Open the project in Android Studio.
+2. Run the `app` configuration on a phone or emulator (the emulator can use your webcam as the back camera).
+
+The debug build installs as `com.jcjiron.qrapp.debug`, so it can sit next to a release build on the same phone.
+
+From the terminal:
 
 ```bash
-./gradlew testDebugUnitTest   # tests del generador de QR
-./gradlew installDebug        # instala en el dispositivo conectado
+./gradlew testDebugUnitTest   # unit tests (domain + data)
+./gradlew installDebug        # install on the connected device
 ```
+
+Every push runs the tests and builds a debug APK in GitHub Actions; download it from the run's **Artifacts** section (`qr-app-debug`) to install on a phone.

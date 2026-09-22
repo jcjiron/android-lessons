@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -17,6 +19,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Lets the debug build live next to the release build on the same phone.
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -25,6 +32,19 @@ android {
             )
         }
     }
+
+    // Declared from day one; uncomment when the app needs separate environments.
+    // flavorDimensions += "environment"
+    // productFlavors {
+    //     create("dev") {
+    //         dimension = "environment"
+    //         applicationIdSuffix = ".dev"
+    //     }
+    //     create("prod") {
+    //         dimension = "environment"
+    //     }
+    // }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -41,6 +61,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
 
     implementation(platform(libs.androidx.compose.bom))
@@ -51,14 +72,19 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     debugImplementation(libs.androidx.ui.tooling)
 
-    // Cámara + lectura de QR
+    // Dependency injection
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    // Camera + QR reading
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.mlkit.barcode.scanning)
 
-    // Generación de QR
+    // QR generation
     implementation(libs.zxing.core)
 
     testImplementation(libs.junit)
