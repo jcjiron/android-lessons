@@ -1,24 +1,48 @@
 package com.jcjiron.qrapp.presentation.main
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.jcjiron.qrapp.domain.repository.QrImageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    private val repository: QrImageRepository,
 ) : ViewModel() {
 
-    // SavedStateHandle keeps the selected tab across rotation and process death.
-    val selectedTab: StateFlow<MainTab> = savedStateHandle.getStateFlow(KEY_TAB, MainTab.Scan)
+    private val _uiState = MutableStateFlow<MainUiState>(MainUiState.Loading)
+    val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
-    fun onTabSelected(tab: MainTab) {
-        savedStateHandle[KEY_TAB] = tab
+    init {
+        viewModelScope.launch {
+            _uiState.value = repository.getImage()
+                ?.let { MainUiState.ShowingImage(it) }
+                ?: MainUiState.Empty()
+        }
     }
 
-    private companion object {
-        const val KEY_TAB = "selected_tab"
+    fun onImagePicked(uri: String) {
+        viewModelScope.launch {
+            _uiState.value = try {
+                MainUiState.ShowingImage(repository.saveImage(uri))
+            } catch (e: IOException) {
+                MainUiState.Empty(saveFailed = true)
+            } catch (e: SecurityException) {
+                MainUiState.Empty(saveFailed = true)
+            }
+        }
+    }
+
+    fun onDeleteImage() {
+        viewModelScope.launch {
+            repository.deleteImage()
+            _uiState.value = MainUiState.Empty()
+        }
     }
 }

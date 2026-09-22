@@ -1,7 +1,7 @@
 package com.jcjiron.qrapp.di
 
-import com.jcjiron.qrapp.data.repository.QrRepositoryImpl
-import com.jcjiron.qrapp.domain.repository.QrRepository
+import com.jcjiron.qrapp.data.repository.QrImageRepositoryImpl
+import com.jcjiron.qrapp.domain.repository.QrImageRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,5 +14,5 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindQrRepository(impl: QrRepositoryImpl): QrRepository
+    abstract fun bindQrImageRepository(impl: QrImageRepositoryImpl): QrImageRepository
 }

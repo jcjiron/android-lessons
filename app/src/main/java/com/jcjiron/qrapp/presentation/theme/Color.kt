@@ -19,6 +19,3 @@ val DarkColors = darkColorScheme(
     secondary = Cyan,
 )
 
-// QR codes stay black on white in both themes: scanners read high contrast best.
-val QrDarkModule = Color.Black
-val QrLightModule = Color.White
